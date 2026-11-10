@@ -15,7 +15,16 @@ export function anunciar(mensagem) {
 }
 
 export function vibrar(padrao = 30) {
-  if (config.vibrar && navigator.vibrate) navigator.vibrate(padrao);
+  // Executa se a vibração estiver ativada nos ajustes (ou se não estiver explicitamente desligada)
+  if (config?.vibrar === false) return;
+
+  if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+    try {
+      navigator.vibrate(padrao);
+    } catch (erro) {
+      console.warn("Não foi possível vibrar o dispositivo:", erro);
+    }
+  }
 }
 
 export function mostrarErro(mensagem) {

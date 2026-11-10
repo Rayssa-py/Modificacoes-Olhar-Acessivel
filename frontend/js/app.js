@@ -163,6 +163,10 @@ async function ligarCamera() {
 // CAPTURA
 async function capturar() {
   if (estado.ocupado) return;
+
+  // Vibração forte imediata (síncrona) disparada antes de qualquer await para não perder o gesto no mobile
+  vibrar([60, 40, 60]);
+
   fala.destravar();
   fala.parar();
   limparErro();
@@ -200,9 +204,6 @@ async function capturar() {
   }
 
   if (camera.ativa() && video?.videoWidth) {
-    // Vibração marcante e forte ao disparar a foto (duplo pulso)
-    vibrar([60, 40, 60]);
-    
     // Congela a imagem do vídeo exatamente no instante da nova captura
     video.pause();
 
@@ -675,18 +676,23 @@ async function salvarConfiguracoesIA() {
 // EVENTOS
 function ligarEventos() {
   // FEEDBACK DE VOZ E VIBRAÇÃO UNIVERSAL EM TODOS OS BOTÕES
-  document.addEventListener("pointerdown", (evento) => {
+  const dispararFeedbackBotao = (evento) => {
     const botao = evento.target.closest("button, [role='button'], [role='radio']");
     if (!botao || botao.disabled) return;
 
-    // Vibração tátil leve de 15ms ao tocar em qualquer botão
-    vibrar(15);
+    // Vibração tátil síncrona imediata (20ms) ao tocar no botão
+    vibrar(20);
 
     const texto = obterTextoBotao(botao);
     if (texto) {
       fala.destravar();
       fala.falar(texto, { temServidor: estado.temServidor });
     }
+  };
+
+  document.addEventListener("touchstart", dispararFeedbackBotao, { passive: true });
+  document.addEventListener("pointerdown", (evento) => {
+    if (evento.pointerType !== "touch") dispararFeedbackBotao(evento);
   }, { passive: true });
 
   // Login
